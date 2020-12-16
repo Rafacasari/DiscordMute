@@ -1,15 +1,13 @@
-﻿using System;
+﻿#region
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Collections;
-using System.Windows.Input;
 using UnityEngine.UI;
 using UIExpansionKit.API;
+#endregion
 
 namespace DiscordMute
 {
@@ -40,8 +38,7 @@ namespace DiscordMute
                 fetchingKeys = false;
                 selectedKey = 0;
                 Page.Hide();
-            }));
-           
+            }));  
         }
 
 
@@ -117,7 +114,6 @@ namespace DiscordMute
         }
 
         public static bool IsKeyDown(Keys key) => KeyStates.Down == (GetKeyState(key) & KeyStates.Down);
-        public static bool IsKeyToggled(Keys key) => KeyStates.Toggled == (GetKeyState(key) & KeyStates.Toggled);
-        
+        public static bool IsKeyToggled(Keys key) => KeyStates.Toggled == (GetKeyState(key) & KeyStates.Toggled);  
     }
 }
