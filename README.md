@@ -1,7 +1,9 @@
-# Discord Mute [![Downloads](https://img.shields.io/github/downloads/Rafacasari/DiscordMute/total?color=blue)](https://github.com/Rafacasari/DiscordMute/releases/latest) [![Current Version](https://img.shields.io/github/v/release/rafacasari/DiscordMute?color=gren&label=version)](https://github.com/Rafacasari/DiscordMute/releases/latest) 
- A simple VRChat Mod for mute/unmute your Discord.<br>
+# Discord Mute [![Downloads](https://img.shields.io/github/downloads/Rafacasari/DiscordMute/total?color=blue)](https://github.com/Rafacasari/DiscordMute/releases/latest) [![Current Version](https://img.shields.io/github/v/release/rafacasari/DiscordMute?color=gren&label=version)](https://github.com/Rafacasari/DiscordMute/releases/latest) [![PayPal](https://img.shields.io/static/v1?label=&message=Donate&color=white&logo=paypal)](https://www.paypal.com/donate?hosted_button_id=EGA5V9WLQWHJS)
+**If you want to support me and encourage to create new mods, click on "Donate" button.** ❤  
+
+ A simple VRChat Mod for mute/unmute your Discord.  
  **Requires UIX to work**.
- 
+
 ### How to use:
 1. Install `DiscordMute.dll` and `UIExpansionKit` to the MelonLoader Mods Folder
 2. Launch VRChat
