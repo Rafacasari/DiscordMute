@@ -5,14 +5,16 @@
  **Requires UIX to work**.
 
 ### How to use:
+- Video: https://youtu.be/SYCmjBy_H38
+
 1. Install `DiscordMute.dll` and `UIExpansionKit` to the MelonLoader Mods Folder
 2. Launch VRChat
 3. Configure the mod with your "Toggle Mute" keybind (Discord Settings > Keybinds > Add a Keybind > Toggle Mute)
-##### Note: You can configure the mod in Settings Menu, or in the QuickMenu.
+##### Note: You can configure the mod in Settings Menu.
 
-Quick Menu           |  Settings Menu
-:-------------------------:|:-------------------------:
-<img src="https://i.imgur.com/Vd8jcA1.png" width=300>  |  <img src="https://i.imgur.com/htAIxjC.png" width=300>
+  Settings Menu
+:-------------------------:
+|  <img src="https://i.imgur.com/htAIxjC.png" width=300>
 
 ##### The menu looks like this, is self explanatory:
 <img src="https://i.imgur.com/wKOnS1n.png" width=400>
