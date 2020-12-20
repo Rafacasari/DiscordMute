@@ -21,14 +21,18 @@ namespace DiscordMute
         {
             Page = ExpansionKitApi.CreateCustomFullMenuPopup(LayoutDescription.WideSlimList);    
             
-            Page.AddLabel("Title", new Action<GameObject>((obj) => { titleObject = obj; }));
+            Page.AddLabel("Title", new Action<GameObject>((obj) => { titleObject = obj; }));    
             Page.AddLabel("Waiting for key...", new Action<GameObject>((obj) => { textObject = obj; }));
+
+            Page.AddSimpleButton("Clear", new Action(() =>
+            {
+                selectedKeys.Clear();
+            }));
 
             Page.AddSimpleButton("Accept", new Action(() =>
             {
-                AcceptAction?.Invoke(selectedKey);
+                AcceptAction?.Invoke(selectedKeys);
                 fetchingKeys = false;
-                selectedKey = 0;
                 Page.Hide();
             }));
 
@@ -36,14 +40,14 @@ namespace DiscordMute
             {
                 CancelAction?.Invoke();
                 fetchingKeys = false;
-                selectedKey = 0;
                 Page.Hide();
-            }));  
+            }));   
         }
 
 
-        public static void Show(string title, Action<Keys> acceptAction, Action cancelAction)
-        {    
+        public static void Show(string title, Action<List<Keys>> acceptAction, Action cancelAction)
+        {
+            selectedKeys.Clear();
             AcceptAction = acceptAction;
             CancelAction = cancelAction;
             Page.Show();
@@ -54,7 +58,7 @@ namespace DiscordMute
             MelonLoader.MelonCoroutines.Start(WaitForKey());
         }
 
-        private static Action<Keys> AcceptAction;
+        private static Action<List<Keys>> AcceptAction;
         private static Action CancelAction;
 
         private static bool fetchingKeys = false;
@@ -63,25 +67,50 @@ namespace DiscordMute
             while (fetchingKeys && textObject != null)
             {
                 foreach (Keys inputKey in Enum.GetValues(typeof(Keys)))
-                    if (!BlacklistedKeys.Contains(inputKey) && Keyboard.IsKeyDown(inputKey) && inputKey != Keys.None)
-                        selectedKey = inputKey;
+                {
+                    if (BlacklistedKeys.Contains(inputKey) || inputKey == Keys.None) continue;
+         
+                    if (Keyboard.IsKeyDown(inputKey) && !selectedKeys.Contains(inputKey) && selectedKeys.Count < 4) // Discord Max Limit
+                        selectedKeys.Add(inputKey);
+                }
 
-                if (textObject != null && selectedKey != Keys.None)
-                    textObject.GetComponentInChildren<Text>().text = selectedKey.ToString();
-                else if (textObject != null && selectedKey == Keys.None)
+                if (textObject != null && selectedKeys.Count == 0)
                     textObject.GetComponentInChildren<Text>().text = "Waiting for key...";
+                else if (textObject != null)
+                {
+                    List<string> names = new List<string>();
+                    foreach (var name in selectedKeys) names.Add(GetName(name));
 
+                    textObject.GetComponentInChildren<Text>().text = string.Join(" + ", names);
+                }
+                
                 yield return new WaitForEndOfFrame();
             }
             yield break;
         }
+        private static string GetName(Keys key)
+        {
+            switch (key)
+            {
+                case Keys.LMenu: return "ALT";
+                case Keys.RMenu: return "RIGHT ALT";
+                case Keys.LControlKey: return  "CTRL";
+                case Keys.RControlKey: return "RIGHT CTRL";
+                case Keys.LShiftKey: return "SHIFT";
+                case Keys.RShiftKey: return "RIGHT SHIFT";
+                case Keys.XButton1: return "MOUSE3";
+                case Keys.XButton2: return "MOUSE4";
 
-        private static Keys selectedKey = 0;
+                default:
+                    return key.ToString();
+            }
+        }
+        private static readonly List<Keys> selectedKeys = new List<Keys>();
 
         #region BlacklistedKeys
         private static readonly List<Keys> BlacklistedKeys = new List<Keys>() {
-            Keys.LButton, Keys.RButton
-        }; // Mouse Buttons
+            Keys.LButton, Keys.RButton, Keys.ControlKey, Keys.ShiftKey, Keys.Menu, Keys.LShiftKey
+        }; // BlackList Mouse Buttons
         #endregion
     }
 

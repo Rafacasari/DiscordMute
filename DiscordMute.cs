@@ -1,10 +1,13 @@
-﻿using MelonLoader;
+﻿#region
+using MelonLoader;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UIExpansionKit.API;
 using UnityEngine;
 using UnityEngine.UI;
 using Keys = System.Windows.Forms.Keys;
+#endregion
 
 namespace DiscordMute
 {
@@ -14,7 +17,7 @@ namespace DiscordMute
         public const string Description = "Mod for mute/unmute Discord directly in-game";
         public const string Author = "Rafa";
         public const string Company = "RBX";
-        public const string Version = "1.0.0";
+        public const string Version = "1.1.0";
         public const string DownloadLink = null;
     }
 
@@ -47,14 +50,16 @@ namespace DiscordMute
 
             void ShowBindManager()
             {
-                BindManager.Show("Press your mute key in keyboard", new Action<Keys>(selectedKey =>
+                BindManager.Show("Press your mute key in keyboard", new Action<List<Keys>>(selectedKeys =>
                 {
-                    MelonPrefs.SetString("DiscordMute", nameof(MuteKey), selectedKey.ToString());
+                    string stringKeys = "";
+                    if (selectedKeys.Count > 0) stringKeys = string.Join(",", selectedKeys);
+
+                    MelonPrefs.SetString("DiscordMute", nameof(MuteKey), stringKeys);
                     MelonPrefs.SaveConfig();
                 }), null);
             }
 
-            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.QuickMenu).AddSimpleButton("Select Discord Bind", () => ShowBindManager());
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.SettingsMenu).AddSimpleButton("Discord Bind", () => ShowBindManager());
 
             var originalMic = GameObject.Find("/UserInterface/QuickMenu/MicControls");
@@ -77,11 +82,22 @@ namespace DiscordMute
 
                 if (!string.IsNullOrEmpty(MuteKey))
                 {
-                    var bind = (Keys)Enum.Parse(typeof(Keys), MuteKey);
-                    keybd_event((byte)bind, (byte)bind, 0, 0);
-                    keybd_event((byte)bind, (byte)bind, KEYEVENTF_KEYUP, 0);
-                }
+                    List<Keys> selectedKeys = new List<Keys>();
+                    if (!string.IsNullOrEmpty(MuteKey))
+                    {
+                        string[] stringKeys = MuteKey.Split(',');
+                        foreach(var stringKey in stringKeys) selectedKeys.Add((Keys)Enum.Parse(typeof(Keys), stringKey));
+                    }
+
+                    // Hold and Release the selected keys
+                    foreach (var key in selectedKeys) HoldKey(key);
+                    foreach (var key in selectedKeys) ReleaseKey(key);
+
+                } else ShowBindManager(); 
             }));
         }
+
+        private void HoldKey(Keys key) => keybd_event((byte)key, (byte)key, 0, 0); 
+        private void ReleaseKey(Keys key) => keybd_event((byte)key, (byte)key, KEYEVENTF_KEYUP, 0); 
     }
 }
