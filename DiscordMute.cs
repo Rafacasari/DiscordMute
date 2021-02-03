@@ -17,7 +17,7 @@ namespace DiscordMute
         public const string Description = "Mod for mute/unmute Discord directly in-game";
         public const string Author = "Rafa";
         public const string Company = "RBX";
-        public const string Version = "1.1.0";
+        public const string Version = "1.1.1";
         public const string DownloadLink = null;
     }
 
@@ -33,13 +33,14 @@ namespace DiscordMute
 
         public override void OnApplicationStart()
         {
-            MelonPrefs.RegisterString("DiscordMute", nameof(MuteKey), "", null, true);
-            OnModSettingsApplied();
+            MelonPreferences.CreateCategory("DiscordMute");
+            MelonPreferences.CreateEntry("DiscordMute", nameof(MuteKey), "", "Mute Key", true);
+            OnPreferencesSaved();
         }
 
-        public override void OnModSettingsApplied()
+        public override void OnPreferencesSaved()
         {
-            MuteKey = MelonPrefs.GetString("DiscordMute", nameof(MuteKey));
+            MuteKey = MelonPreferences.GetEntryValue<string>("DiscordMute", nameof(MuteKey));
         }
 
         private GameObject DiscordButton;
@@ -55,8 +56,8 @@ namespace DiscordMute
                     string stringKeys = "";
                     if (selectedKeys.Count > 0) stringKeys = string.Join(",", selectedKeys);
 
-                    MelonPrefs.SetString("DiscordMute", nameof(MuteKey), stringKeys);
-                    MelonPrefs.SaveConfig();
+                    MelonPreferences.SetEntryValue("DiscordMute", nameof(MuteKey), stringKeys);
+                    MelonPreferences.Save();
                 }), null);
             }
 
