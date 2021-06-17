@@ -1,6 +1,7 @@
 ﻿#region
 using MelonLoader;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UIExpansionKit.API;
@@ -17,7 +18,7 @@ namespace DiscordMute
         public const string Description = "Mod for mute/unmute Discord directly in-game";
         public const string Author = "Rafa";
         public const string Company = "RBX";
-        public const string Version = "1.1.1";
+        public const string Version = "1.1.2";
         public const string DownloadLink = null;
     }
 
@@ -36,16 +37,23 @@ namespace DiscordMute
             MelonPreferences.CreateCategory("DiscordMute");
             MelonPreferences.CreateEntry("DiscordMute", nameof(MuteKey), "", "Mute Key", true);
             OnPreferencesSaved();
+            MelonCoroutines.Start(UiManagerInitializer());
         }
 
         public override void OnPreferencesSaved()
         {
             MuteKey = MelonPreferences.GetEntryValue<string>("DiscordMute", nameof(MuteKey));
         }
+        
+        private IEnumerator UiManagerInitializer()
+        {
+            while (VRCUiManager.prop_VRCUiManager_0 == null) yield return null;
+            OnUiManagerInit();
+        }
 
         private GameObject DiscordButton;
 
-        public override void VRChat_OnUiManagerInit()
+        public void OnUiManagerInit()
         {
             BindManager.Initialize();
 
