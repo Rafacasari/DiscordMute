@@ -18,7 +18,7 @@ namespace DiscordMute
         public const string Description = "Mod for mute/unmute Discord directly in-game";
         public const string Author = "Rafa";
         public const string Company = "RBX";
-        public const string Version = "1.1.2";
+        public const string Version = "1.1.3";
         public const string DownloadLink = null;
     }
 
