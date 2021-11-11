@@ -8,17 +8,19 @@ using UIExpansionKit.API;
 using UnityEngine;
 using UnityEngine.UI;
 using Keys = System.Windows.Forms.Keys;
+using VRC.UI.Elements.Controls;
+using VRC.UI.Elements.Tooltips;
 #endregion
 
 namespace DiscordMute
 {
     public static class BuildInfo
     {
-        public const string Name = "DiscordMute"; 
+        public const string Name = "DiscordMute";
         public const string Description = "Mod for mute/unmute Discord directly in-game";
         public const string Author = "Rafa";
         public const string Company = "RBX";
-        public const string Version = "1.1.3";
+        public const string Version = "1.2.0";
         public const string DownloadLink = null;
     }
 
@@ -35,26 +37,51 @@ namespace DiscordMute
         public override void OnApplicationStart()
         {
             MelonPreferences.CreateCategory("DiscordMute");
-            MelonPreferences.CreateEntry("DiscordMute", nameof(MuteKey), "", "Mute Key", true);
+            MelonPreferences.CreateEntry("DiscordMute", nameof(MuteKey), "", is_hidden: true);
             OnPreferencesSaved();
-            MelonCoroutines.Start(UiManagerInitializer());
+
+            MelonCoroutines.Start(FindMePls());
         }
 
         public override void OnPreferencesSaved()
         {
             MuteKey = MelonPreferences.GetEntryValue<string>("DiscordMute", nameof(MuteKey));
         }
-        
-        private IEnumerator UiManagerInitializer()
+
+
+        private static Transform UserInterface;
+        private static Transform QuickMenu;
+        private IEnumerator FindMePls()
         {
-            while (VRCUiManager.prop_VRCUiManager_0 == null) yield return null;
-            OnUiManagerInit();
+            MelonLogger.Msg("Waiting for VRChat UI...");
+            while ((UserInterface = GameObject.Find("UserInterface")?.transform) is null)
+                yield return null;
+
+            while ((QuickMenu = UserInterface.Find("Canvas_QuickMenu(Clone)")) is null)
+                yield return null;
+
+            MelonCoroutines.Start(InitializeUI());
         }
+
+
 
         private GameObject DiscordButton;
 
-        public void OnUiManagerInit()
+        public IEnumerator InitializeUI()
         {
+            MelonLogger.Msg("Initializing DiscordMute UI...");
+            var parentObject = QuickMenu.Find("Container").Find("Window").transform;
+            var originalMic = parentObject.Find("MicButton").gameObject;
+
+            DiscordButton = UnityEngine.Object.Instantiate(originalMic, originalMic.transform);
+            DiscordButton.name = "DiscordButton";
+            DiscordButton.transform.SetParent(parentObject);
+
+            DiscordButton.SetActive(true);
+            DiscordButton.transform.localPosition += new Vector3(30, 97, 0);
+
+
+            MelonLogger.Msg("Initializing Bind Manager");
             BindManager.Initialize();
 
             void ShowBindManager()
@@ -71,42 +98,46 @@ namespace DiscordMute
 
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.SettingsMenu).AddSimpleButton("Discord Bind", () => ShowBindManager());
 
-            var originalMic = GameObject.Find("/UserInterface/QuickMenu/MicControls");
-            DiscordButton = GameObject.Instantiate(originalMic, originalMic.transform);
-            DiscordButton.name = "Discord";
+            UnityEngine.Object.Destroy(DiscordButton.GetComponent<MicToggle>());
+            UnityEngine.Object.Destroy(DiscordButton.GetComponent<Toggle>());
 
-            DiscordButton.SetActive(true);
-            DiscordButton.transform.localPosition -= new Vector3(420, 7);
+            yield return null; // Wait object destroy
 
-            DiscordButton.GetComponentInChildren<Text>().text = "Discord";
+            var tooltip = DiscordButton.GetComponent<UiToggleTooltip>();
 
-            var button = DiscordButton.GetComponentInChildren<Button>();
-            button.onClick = new Button.ButtonClickedEvent();
-            button.onClick.AddListener(new Action(() => {
+            tooltip.field_Public_String_0 = "Discord";
+            tooltip.field_Public_String_1 = "Discord";
 
-                bool isEnabled = !GameObject.Find("/UserInterface/QuickMenu/MicControls/Discord/MicButton/MicEnabled").activeSelf;
+            var toggle = DiscordButton.AddComponent<Toggle>();
 
-                GameObject.Find("/UserInterface/QuickMenu/MicControls/Discord/MicButton/MicEnabled").gameObject.SetActive(isEnabled);
-                GameObject.Find("/UserInterface/QuickMenu/MicControls/Discord/MicButton/MicDisabled").gameObject.SetActive(!isEnabled);
+            yield return null; // Wait component
 
+            toggle.onValueChanged.RemoveAllListeners();
+
+            toggle.isOn = true;
+            toggle.onValueChanged.AddListener(new Action<bool>(value =>
+            {
                 if (!string.IsNullOrEmpty(MuteKey))
                 {
                     List<Keys> selectedKeys = new List<Keys>();
                     if (!string.IsNullOrEmpty(MuteKey))
                     {
                         string[] stringKeys = MuteKey.Split(',');
-                        foreach(var stringKey in stringKeys) selectedKeys.Add((Keys)Enum.Parse(typeof(Keys), stringKey));
+                        foreach (var stringKey in stringKeys) selectedKeys.Add((Keys)Enum.Parse(typeof(Keys), stringKey));
                     }
 
                     // Hold and Release the selected keys
                     foreach (var key in selectedKeys) HoldKey(key);
                     foreach (var key in selectedKeys) ReleaseKey(key);
 
-                } else ShowBindManager(); 
+                }
+                else ShowBindManager();
             }));
+
+            yield break;
         }
 
-        private void HoldKey(Keys key) => keybd_event((byte)key, (byte)key, 0, 0); 
-        private void ReleaseKey(Keys key) => keybd_event((byte)key, (byte)key, KEYEVENTF_KEYUP, 0); 
+        private void HoldKey(Keys key) => keybd_event((byte)key, (byte)key, 0, 0);
+        private void ReleaseKey(Keys key) => keybd_event((byte)key, (byte)key, KEYEVENTF_KEYUP, 0);
     }
 }
