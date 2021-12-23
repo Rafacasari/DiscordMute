@@ -55,8 +55,9 @@ namespace DiscordMute
         {
             MelonLogger.Msg("Waiting for VRChat UI...");
 
-            // Thank u, ImStellar
-            // https://github.com/ImStellar/Stellarmojis/blob/171c91c99cbcafde58d8afd898dd7ef0ec00603f/Stemojis/Kirai/WingAPI.cs#L24
+            // Thank u, xKiraiChan
+            // https://github.com/xKiraiChan/WingAPI/blob/master/WingAPI.cs#L30-L34
+            // And sorry for late response, I'm busy working on other projects
             while ((UserInterface = GameObject.Find("UserInterface")?.transform) is null)
                 yield return null;
 
